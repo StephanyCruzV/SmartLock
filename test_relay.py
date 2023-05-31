@@ -9,16 +9,16 @@ Relay = 13								# Relay pin, energize with 12V
 Push = 12								# Push Botton, Inside desativator
 Green = 14								# Led indicator "UNLOCKED / OPEN"
 Red = 15								# Led indicator "LOCK / WRONG PASSWORD"
-pinPassword = ""						# Decalre variable for pinpad password
-entrada = ""							# Declare variable to read pinpad input
+pinPassword = ""							# Decalre variable for pinpad password
+entrada = ""								# Declare variable to read pinpad input
 
 # ---------------- Define Flags ----------------
 flagPinPad = False						# Flag for "in PinPad Mode"
 flagVision = False						# Flag "in Vision Mode"	
-flagUnlock = Value(c_bool, False)		# Flag to validate intern unlock this allows
-											# to Unlock and interrupt any mode safely 
+flagUnlock = Value(c_bool, False)				# Flag to validate intern unlock this allows
+									# to Unlock and interrupt any mode safely 
 TECLA_ABAJO= True						# PinPad flag for key pushed.
-TECLA_ARRIBA = False					# PinPad flag for key in false.
+TECLA_ARRIBA = False						# PinPad flag for key in false.
 
 # ---------------- GPIO Configuration ----------------
 GPIO.setmode(GPIO.BCM)
