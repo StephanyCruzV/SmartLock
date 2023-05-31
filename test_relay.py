@@ -1,25 +1,26 @@
+
 import RPi.GPIO as GPIO
 from time import sleep
 from multiprocessing  import Process, Value
 from ctypes import c_bool
 
-# Define variables
-Relay = 13
-Push = 12
-Green = 14
-Red = 15
-pinPassword = ""
-entrada = ""
+# ---------------- Define variables ----------------
+Relay = 13								# Relay pin, energize with 12V
+Push = 12								# Push Botton, Inside desativator
+Green = 14								# Led indicator "UNLOCKED / OPEN"
+Red = 15								# Led indicator "LOCK / WRONG PASSWORD"
+pinPassword = ""						# Decalre variable for pinpad password
+entrada = ""							# Declare variable to read pinpad input
 
-#Define flags
-flagPinPad = False
-flagVision = False
-flagUnlock = Value(c_bool, False)
+# ---------------- Define Flags ----------------
+flagPinPad = False						# Flag for "in PinPad Mode"
+flagVision = False						# Flag "in Vision Mode"	
+flagUnlock = Value(c_bool, False)		# Flag to validate intern unlock this allows
+											# to Unlock and interrupt any mode safely 
+TECLA_ABAJO= True						# PinPad flag for key pushed.
+TECLA_ARRIBA = False					# PinPad flag for key in false.
 
-TECLA_ABAJO= True
-TECLA_ARRIBA = False
-
-# Define GPIO configuration
+# ---------------- GPIO Configuration ----------------
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 
@@ -28,67 +29,80 @@ GPIO.setup(Green, GPIO.OUT)
 GPIO.setup(Red, GPIO.OUT)
 GPIO.setup(Push, GPIO.IN)
 
-# Define variables
-teclas=[['A', '3', '2', '1'], ['B', '6', '5', '4'], ['C', '9', '8', '7'], ['D', '#', '0', '*']]
+# ---------------- Define PinPad Matrix ----------------
+teclas=[['A', '3', '2', '1'], 
+		['B', '6', '5', '4'], 
+		['C', '9', '8', '7'], 
+		['D', '#', '0', '*']]
 
-#Pines del GPIO
+# ---------------- Define PinPad GPIO Pins ----------------
 filas=[2,3,4,5]
 columnas=[6,7,8,9]
 
-#Read Password file
+# ---------------- Define Rows Pins as Outputs ---------------- 
+for pin in filas:
+	GPIO.setup(pin, GPIO.OUT)
+	
+# ---------------- Define Columns Pins as Inputs ----------------
+for pin in columnas:
+	GPIO.setup(pin, GPIO.IN, pull_up_down= GPIO.PUD_DOWN)
+
+# ---------------- Read Password file ----------------
+''' Add function description'''
 def readPasswordFile():
 	global pinPassword
 	with open('password.txt', 'r') as file:
 		data = file.readline()
+		# Read digits of stored password in file
 		l = [int(i) for i in data if i.isdigit()]
+		# Convert list of digits into string to manipulate
 		pinPassword = ''.join(str(j) for j in l)
+	# Print actual password in file
 	print(pinPassword)	
 	file.close()
-	
+
+# ---------------- Save New Password in File ----------------
+''' Add function description'''	
 def savePassword(newpassword):
 	with open('password.txt', 'w') as file:
 		file.write(newpassword)
 	print(newpassword)	
 	file.close()
-
-#define los pines de filas como salidas 
-for pin in filas:
-	GPIO.setup(pin, GPIO.OUT)
 	
-#define los pines de columnas como entradas
-for pin in columnas:
-	GPIO.setup(pin, GPIO.IN, pull_up_down= GPIO.PUD_DOWN)
-	
+# ---------------- Initialize PinPad Configurations ----------------
 def initPinPad():
 	for fila in range(0,4):
 		for columna in range(0,4):
 			GPIO.output(filas[fila],False)
-			
+
+# ---------------- Scan PinPid Inputs ----------------
 def scan(fila, columna):
-	#Define columna actual como HIGH
+	#Define actual column as HIGH
 	GPIO.output(filas[fila],True)
 	tecla = None
 	
-	#verifica por teclas si hay una presionada
+	# Verify if any key has been push/activated
 	if GPIO.input(columnas[columna]) == TECLA_ABAJO:
 		tecla= TECLA_ABAJO
 	if GPIO.input(columnas[columna]) == TECLA_ARRIBA:
 		tecla= TECLA_ARRIBA
 		
 	GPIO.output(filas[fila],False)
+	# Returns key when pushed
 	return tecla
 
-
+# ---------------- Unlock Function ----------------
 def unlock():
 	GPIO.output(Relay,True)
-	
+
+# ---------------- Lock Function ----------------
 def lock():
-	if not flagUnlock.value:
+
+	if not flagUnlock.value:		
+		# This avoids to lock when is not desired
 		GPIO.output(Relay, False)
 
-# Todas las columnas en low
-initPinPad()
-
+# ---------------- Funtion to read all PinPad ----------------
 def readPad():
 	for fila in range (4):
 		for columna in range (4):
@@ -100,6 +114,7 @@ def readPad():
 				return last_key
 	return ""
 
+# ---------------- Unlock unis PinPad Password ----------------
 def pinUnlock(userIn):
 	global flagPinPad
 	global entrada
@@ -122,13 +137,15 @@ def pinUnlock(userIn):
 			GPIO.output(Red,False)
 			entrada=""
 			print("error")
-			
+
+# ---------------- Validate Password ----------------		
 def validatePassword(password, userIn):
 	if userIn == password:
 		return True
 	else:
 		return False
 
+# ---------------- Change PinPad Password ----------------
 def changePassword():
 	global pinPassword
 	global flagPinPad
@@ -183,11 +200,13 @@ def changePassword():
 				else:
 					print("Password changed")
 					pinPassword = newPassword
+					# Save New Password in txt File
 					savePassword(pinPassword)
 					return
 	
 	flagPinPad = True
 
+# ---------------- Functionality for PinPad Mode ----------------
 def modePinPad():
 	global flagPinPad
 	#readPasswordFile()
@@ -205,7 +224,7 @@ def modePinPad():
 	flagPinPad = False
 	print(" Ready, select mode")
 	
-	
+# ---------------- Select Operation Mode ----------------
 def unlockMode():
 	while True:
 		mode=readPad()
@@ -216,6 +235,7 @@ def unlockMode():
 			# Unlock with PinPad
 			modePinPad()
 
+# ---------------- Intern Unlock Method ----------------
 # Define Inter Button Unlock Interruption
 def internUnlock(): 
 	
@@ -229,6 +249,7 @@ def internUnlock():
 		else:
 			lock()
 
+# ---------------- Define Facial Recognition Mode ----------------
 def modeEric():
 	global flagVision
 	print(" Modo Eric Uwu")
@@ -239,7 +260,10 @@ def modeEric():
 	print(" Ready, select mode")
 	flagVision = False
 
+# ========================= MAIN =========================
 if __name__ == '__main__':
+	# Init PinPad
+	initPinPad()
 	print(" Ready, select mode")
 	
 	readPasswordFile()
