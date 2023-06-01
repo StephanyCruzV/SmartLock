@@ -1,5 +1,5 @@
 
-from pinpadModule import *
+from pinpad_module import *
 
 # ========================= MAIN =========================
 if __name__ == '__main__':
