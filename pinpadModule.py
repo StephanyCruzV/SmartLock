@@ -260,6 +260,7 @@ def modeEric():
 	print(" Ready, select mode")
 	flagVision = False
 
+'''
 # ========================= MAIN =========================
 if __name__ == '__main__':
 	# Init PinPad
@@ -279,4 +280,5 @@ if __name__ == '__main__':
 	# Wait for processes to finish
 	p1.join()
 	p2.join()
+'''
 	
