@@ -36,7 +36,7 @@ teclas=[['A', '3', '2', '1'],
 		['D', '#', '0', '*']]
 
 # ---------------- Define PinPad GPIO Pins ----------------
-filas=[2,3,4,5]
+filas=[17,27,4,5]
 columnas=[6,7,8,9]
 
 # ---------------- Define Rows Pins as Outputs ---------------- 
