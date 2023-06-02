@@ -1,5 +1,5 @@
 import time
-from lcd_module import *
+import lcd_module
 
 # Check reference: 
 #https://letsmakeprojects.com/interface-lcd-with-raspberry-pi-very-easily-using-i2c-and-python/
