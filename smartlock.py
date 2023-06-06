@@ -3,6 +3,7 @@ import RPi.GPIO as GPIO
 from time import sleep
 from multiprocessing  import Process, Value
 from ctypes import c_bool
+import lcd_module
 
 # ---------------- Define variables ----------------
 Relay = 13								# Relay pin, energize with 12V
@@ -11,6 +12,12 @@ Green = 14								# Led indicator "UNLOCKED / OPEN"
 Red = 15								# Led indicator "LOCK / WRONG PASSWORD"
 pinPassword = ""							# Decalre variable for pinpad password
 entrada = ""								# Declare variable to read pinpad input
+
+# ---------------- Define LCD variables ----------------
+mylcd = lcd_module.lcd()
+second = 0
+mystr = ""
+messageOption = 0
 
 # ---------------- Define Flags ----------------
 flagPinPad = False						# Flag for "in PinPad Mode"
@@ -133,7 +140,7 @@ def pinUnlock(userIn):
 		else:
 			lock()
 			GPIO.output(Red,True)
-			sleep(1)
+			sleep(2)
 			GPIO.output(Red,False)
 			entrada=""
 			print("error")
@@ -249,6 +256,55 @@ def internUnlock():
 		else:
 			lock()
 
+#
+
+def initLCD():
+	global mylcd
+	global second
+	global messageOption
+	messageOption = 1
+	displayMessage(messageOption)
+	sleep(1)
+	
+		
+def initializeLCD():
+	global mylcd
+	mylcd.lcd_clear()
+	mylcd.lcd_display_string("READY", 1, 5)
+	mylcd.lcd_display_string("SELECT MODE", 2, 2)
+	
+def writePassword():
+	global mylcd
+	global mystr
+	global second
+	mystr = ""
+	second = 0
+	while second<6:
+		mystr = mystr + "*"
+		mylcd.lcd_display_string(mystr, 2, 0)
+		second = second + 1
+		sleep(1)
+	
+def displayMessage(option):
+	global mylcd
+	global mystr
+	if option == 1:
+		initializeLCD()
+	if option == 2:
+		mylcd.lcd_clear()
+		mylcd.lcd_display_string("ENTER ACTUAL", 1, 1)
+		writePassword()
+	if option == 3:
+		mylcd.lcd_clear()
+		mylcd.lcd_display_string("ENTER NEW", 1, 1)
+		writePassword()
+	if option == 4:
+		mylcd.lcd_clear()
+		mylcd.lcd_display_string("RE-ENTER NEW", 1, 1)
+		writePassword()
+		
+	sleep(1)
+
 # ---------------- Define Facial Recognition Mode ----------------
 def modeEric():
 	global flagVision
@@ -262,6 +318,7 @@ def modeEric():
 
 # ========================= MAIN =========================
 if __name__ == '__main__':
+	initLCD()
 	# Init PinPad
 	initPinPad()
 	print(" Ready, select mode")
