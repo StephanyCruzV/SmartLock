@@ -216,6 +216,7 @@ def changePassword():
 # ---------------- Functionality for PinPad Mode ----------------
 def modePinPad():
 	global flagPinPad
+	global mylcd
 	#readPasswordFile()
 	while not flagPinPad:
 		global entrada
@@ -229,6 +230,8 @@ def modePinPad():
 			print(entrada)
 			pinUnlock(entrada)
 	flagPinPad = False
+	mylcd.lcd_clear()
+	mylcd.lcd_display_string("TEST", 1, 5)
 	print(" Ready, select mode")
 	
 # ---------------- Select Operation Mode ----------------
@@ -256,8 +259,7 @@ def internUnlock():
 		else:
 			lock()
 
-#
-
+# ---------------- Define Test Function ---------------- 
 def initLCD():
 	global mylcd
 	global second
@@ -266,13 +268,15 @@ def initLCD():
 	displayMessage(messageOption)
 	sleep(1)
 	
-		
+# ---------------- Initialize LCD ----------------
 def initializeLCD():
 	global mylcd
+	global mystr
 	mylcd.lcd_clear()
 	mylcd.lcd_display_string("READY", 1, 5)
 	mylcd.lcd_display_string("SELECT MODE", 2, 2)
-	
+
+# ---------------- 
 def writePassword():
 	global mylcd
 	global mystr
@@ -284,7 +288,8 @@ def writePassword():
 		mylcd.lcd_display_string(mystr, 2, 0)
 		second = second + 1
 		sleep(1)
-	
+
+# ----------------
 def displayMessage(option):
 	global mylcd
 	global mystr
@@ -318,9 +323,10 @@ def modeEric():
 
 # ========================= MAIN =========================
 if __name__ == '__main__':
-	initLCD()
+	#initLCD()
 	# Init PinPad
 	initPinPad()
+	initLCD()
 	print(" Ready, select mode")
 	
 	readPasswordFile()
