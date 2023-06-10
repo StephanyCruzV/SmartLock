@@ -10,8 +10,8 @@ Relay = 13								# Relay pin, energize with 12V
 Push = 12								# Push Botton, Inside desativator
 Green = 14								# Led indicator "UNLOCKED / OPEN"
 Red = 15								# Led indicator "LOCK / WRONG PASSWORD"
-pinPassword = ""							# Decalre variable for pinpad password
-entrada = ""								# Declare variable to read pinpad input
+pinPassword = ""						# Decalre variable for pinpad password
+entrada = ""							# Declare variable to read pinpad input
 
 # ---------------- Define LCD variables ----------------
 mylcd = lcd_module.lcd()
@@ -22,10 +22,10 @@ messageOption = 0
 # ---------------- Define Flags ----------------
 flagPinPad = False						# Flag for "in PinPad Mode"
 flagVision = False						# Flag "in Vision Mode"	
-flagUnlock = Value(c_bool, False)				# Flag to validate intern unlock this allows
-									# to Unlock and interrupt any mode safely 
+flagUnlock = Value(c_bool, False)		# Flag to validate intern unlock this allows
+										# to Unlock and interrupt any mode safely 
 TECLA_ABAJO= True						# PinPad flag for key pushed.
-TECLA_ARRIBA = False						# PinPad flag for key in false.
+TECLA_ARRIBA = False					# PinPad flag for key in false.
 
 # ---------------- GPIO Configuration ----------------
 GPIO.setmode(GPIO.BCM)
@@ -75,6 +75,53 @@ def savePassword(newpassword):
 		file.write(newpassword)
 	print(newpassword)	
 	file.close()
+
+
+# ----------------
+def displayMessage(option):
+	global mylcd
+	global mystr
+	mylcd.lcd_clear()
+	if option == 1:
+		mylcd.lcd_display_string("READY", 1, 5)
+		mylcd.lcd_display_string("SELECT MODE", 2, 2)
+	if option == 2:
+		mylcd.lcd_display_string("ENTER ACTUAL", 1, 1)
+		mylcd.lcd_display_string("PASSWORD:", 2, 1)
+	if option == 3:
+		mylcd.lcd_display_string("ENTER NEW", 1, 1)
+		mylcd.lcd_display_string("PASSWORD:", 2, 1)
+	if option == 4:
+		mylcd.lcd_display_string("RE-ENTER NEW", 1, 1)
+		mylcd.lcd_display_string("PASSWORD:", 2, 1)
+	if option == 5:
+		mylcd.lcd_display_string("PINPAD UNLOCK", 1, 1)
+		mylcd.lcd_display_string("PASSWORD:", 2, 1)
+	if option == 6:
+		mylcd.lcd_display_string("ERROR", 1, 5)
+		mylcd.lcd_display_string("MISSMATCH INPUT", 2, 1)
+	if option == 7:
+		mylcd.lcd_display_string("SUCCESS", 1, 4)
+		mylcd.lcd_display_string("PASSWORD SAVED", 2, 1)
+	if option == 8:
+		mylcd.lcd_display_string("SUCCESS", 1, 4)
+		mylcd.lcd_display_string("DOOR UNLOKED", 2, 2)
+	if option == 9:
+		mylcd.lcd_display_string("ERROR", 1, 6)
+		mylcd.lcd_display_string("WRONG PASSWORD", 2, 1)
+	
+	sleep(1)
+	
+
+# ---------------- 
+def displayPass(usrinLen):
+	global mylcd
+	global mystr
+	mystr = ""
+	
+	for i in usrinLen:
+		mystr = mystr + "*"
+	mylcd.lcd_display_string(mystr, 2, 10)
 	
 # ---------------- Initialize PinPad Configurations ----------------
 def initPinPad():
@@ -132,6 +179,7 @@ def pinUnlock(userIn):
 			unlock()
 			GPIO.output(Green,True)
 			flagPinPad = True
+			displayMessage(8)
 			sleep(10)
 			GPIO.output(Green,False)
 			flagUnlock.value = False
@@ -140,10 +188,13 @@ def pinUnlock(userIn):
 		else:
 			lock()
 			GPIO.output(Red,True)
+			displayMessage(9)
 			sleep(2)
 			GPIO.output(Red,False)
 			entrada=""
 			print("error")
+			displayMessage(5)
+			
 
 # ---------------- Validate Password ----------------		
 def validatePassword(password, userIn):
@@ -156,10 +207,12 @@ def validatePassword(password, userIn):
 def changePassword():
 	global pinPassword
 	global flagPinPad
+	
 	gpFlag = False
 	userIn = ""
 	
 	print("Enter Current Password")
+	displayMessage(2)
 	while not gpFlag:
 		key = readPad()
 		if key == '*':
@@ -167,6 +220,7 @@ def changePassword():
 		else:
 			userIn = userIn + key
 			print(userIn)
+			displayPass(userIn)
 			if len(userIn) == 6:
 				gpFlag = validatePassword(pinPassword, userIn)
 				print(gpFlag)
@@ -174,6 +228,7 @@ def changePassword():
 					return
 
 	print("Enter New Password")
+	displayMessage(3)
 	gpFlag = False
 	userIn = ""
 	while not gpFlag:
@@ -183,11 +238,13 @@ def changePassword():
 		else:
 			userIn = userIn + key
 			print(userIn)
+			displayPass(userIn)
 			if len(userIn) == 6:
 				newPassword = userIn
 				gpFlag = True
 				
 	print("Reenter New Password to Confirm")
+	displayMessage(4)
 	
 	gpFlag = False
 	userIn = ""
@@ -198,13 +255,16 @@ def changePassword():
 		else:
 			userIn = userIn + key
 			print(userIn)
+			displayPass(userIn)
 			if len(userIn) == 6:
 				gpFlag = validatePassword(newPassword, userIn)
 				print(gpFlag)
 				if not gpFlag:
+					displayMessage(6)
 					print("Missmatch password")
 					return
 				else:
+					displayMessage(7)
 					print("Password changed")
 					pinPassword = newPassword
 					# Save New Password in txt File
@@ -216,8 +276,7 @@ def changePassword():
 # ---------------- Functionality for PinPad Mode ----------------
 def modePinPad():
 	global flagPinPad
-	global mylcd
-	#readPasswordFile()
+	
 	while not flagPinPad:
 		global entrada
 		key = readPad()
@@ -228,10 +287,10 @@ def modePinPad():
 		else:
 			entrada = entrada + key
 			print(entrada)
+			displayPass(entrada)
 			pinUnlock(entrada)
 	flagPinPad = False
-	mylcd.lcd_clear()
-	mylcd.lcd_display_string("TEST", 1, 5)
+	displayMessage(1)
 	print(" Ready, select mode")
 	
 # ---------------- Select Operation Mode ----------------
@@ -243,6 +302,7 @@ def unlockMode():
 			modeEric()
 		if mode == 'B':
 			# Unlock with PinPad
+			displayMessage(5)
 			modePinPad()
 
 # ---------------- Intern Unlock Method ----------------
@@ -258,57 +318,6 @@ def internUnlock():
 			lock()
 		else:
 			lock()
-
-# ---------------- Define Test Function ---------------- 
-def initLCD():
-	global mylcd
-	global second
-	global messageOption
-	messageOption = 1
-	displayMessage(messageOption)
-	sleep(1)
-	
-# ---------------- Initialize LCD ----------------
-def initializeLCD():
-	global mylcd
-	global mystr
-	mylcd.lcd_clear()
-	mylcd.lcd_display_string("READY", 1, 5)
-	mylcd.lcd_display_string("SELECT MODE", 2, 2)
-
-# ---------------- 
-def writePassword():
-	global mylcd
-	global mystr
-	global second
-	mystr = ""
-	second = 0
-	while second<6:
-		mystr = mystr + "*"
-		mylcd.lcd_display_string(mystr, 2, 0)
-		second = second + 1
-		sleep(1)
-
-# ----------------
-def displayMessage(option):
-	global mylcd
-	global mystr
-	if option == 1:
-		initializeLCD()
-	if option == 2:
-		mylcd.lcd_clear()
-		mylcd.lcd_display_string("ENTER ACTUAL", 1, 1)
-		writePassword()
-	if option == 3:
-		mylcd.lcd_clear()
-		mylcd.lcd_display_string("ENTER NEW", 1, 1)
-		writePassword()
-	if option == 4:
-		mylcd.lcd_clear()
-		mylcd.lcd_display_string("RE-ENTER NEW", 1, 1)
-		writePassword()
-		
-	sleep(1)
 
 # ---------------- Define Facial Recognition Mode ----------------
 def modeEric():
@@ -326,7 +335,7 @@ if __name__ == '__main__':
 	#initLCD()
 	# Init PinPad
 	initPinPad()
-	initLCD()
+	displayMessage(1)
 	print(" Ready, select mode")
 	
 	readPasswordFile()
