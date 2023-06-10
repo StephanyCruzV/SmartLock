@@ -12,6 +12,7 @@ with open("nameslist.txt", "r") as f:
         names.add(i)
 
 def main():
+    show_menu = True
     while True:
         print("\n--- Menu ---")
         print("1. Agregar un usuario")
@@ -28,6 +29,7 @@ def main():
             break
         else:
             print("Opción inválida, intente nuevamente")
+            show_menu = True
 
 def add_user():
     print("\nElige 1, 2 o 3")
@@ -43,6 +45,7 @@ def add_user():
         start_capture(name)
         train_classifer(name)
         print("El modelo ha sido entrenado exitosamente!")
+    return False
         
 def check_user():
     print("\nUsuarios registrados: ")
@@ -56,6 +59,7 @@ def check_user():
         print("Error: El usuario no existe")
     else:
         main_app(name)
+    return False
 
 if __name__ == "__main__":
     main()

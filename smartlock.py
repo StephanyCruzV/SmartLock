@@ -5,6 +5,22 @@ from multiprocessing  import Process, Value
 from ctypes import c_bool
 import lcd_module
 
+from Detector import main_app
+from create_classifier import train_classifer
+from create_dataset import start_capture
+
+
+# ---------------- Define FR variables ----------------
+show_menu = False
+names = set()
+
+# Leer los nombres existentes desde el archivo
+with open("nameslist.txt", "r") as f:
+    x = f.read()
+    z = x.rstrip().split(" ")
+    for i in z:
+        names.add(i)
+
 # ---------------- Define variables ----------------
 Relay = 13								# Relay pin, energize with 12V
 Push = 12								# Push Botton, Inside desativator
@@ -75,7 +91,7 @@ def savePassword(newpassword):
 	file.close()
 
 
-# ---------------- Define LCD messages ----------------
+# ---------------- Define LCD PinPad messages ----------------
 def displayMessage(option):
 	global mylcd
 	global mystr
@@ -114,6 +130,21 @@ def displayMessage(option):
 	sleep(1)
 	
 
+# ---------------- Define LCD FR messages ----------------
+def messageFR(option):
+	global mylcd
+	global mystr
+	mylcd.lcd_clear()
+	if option == 1:
+		mylcd.lcd_display_string("FACIAL", 1, 5)
+		mylcd.lcd_display_string("RECOGNITION", 2, 2)
+	if option == 2:
+		mylcd.lcd_display_string("ENTER ACTUAL", 1, 1)
+		mylcd.lcd_display_string("PASSWORD:", 2, 1)
+	if option == 3:
+		mylcd.lcd_display_string("ENTER NEW", 1, 1)
+		mylcd.lcd_display_string("PASSWORD:", 2, 1)
+	
 # ---------------- Display "*" as password character ----------------
 def displayPass(usrinLen):
 	global mylcd
@@ -301,13 +332,89 @@ def modePinPad():
 	displayMessage(1)
 	print(" Ready, select mode")
 	
+# ========================= FR Functions =========================
+
+def check_user():
+	print("Select User: 1, 2, 3")
+	openLockFlag = False
+	while not openLockFlag:
+		key = readPad()
+		
+		if key == '1':
+			openLockFlag = main_app("User1")
+		elif key == '2':
+			openLockFlag = main_app("User2")
+		elif key == '3':
+			openLockFlag = main_app("User3")
+	print("User Recognized")
+	sleep(1)
+	print(" Ready, select mode")
+	unlockMode()
+		
+
+
+def add_user():
+	print("\nElige 1, 2 o 3")
+	
+	while True:
+		key = readPad()
+		
+		if key == '1':
+			names.add("User1")
+			start_capture("User1")
+			train_classifer("User1")
+			print("Train successed")
+			displayMenu()
+		elif key == '2':
+			names.add("User2")
+			start_capture("User2")
+			train_classifer("User2")
+			print("Train successed")
+			displayMenu()
+		elif key == '3':
+			names.add("User3")
+			start_capture("User3")
+			train_classifer("User3")
+			print("Train successed")
+			displayMenu()
+		
+
+def displayMenu():
+	print("\n--- Menu ---")
+	print("1. Agregar un usuario")
+	print("2. Verificar un usuario")
+	print("*. Salir")
+	
+	while True:
+		key = readPad()
+		
+		if key == '1':
+			add_user()
+		elif key == '2':
+			check_user()
+		elif key == '*':
+			flagVision = True
+	
+
+# ---------------- Define Facial Recognition Mode ----------------
+def modeEric():
+	global flagVision
+	global show_menu
+	print(" Modo Eric Uwu")
+
+	while not flagVision:
+		displayMenu()
+	print(" Ready, select mode")
+	displayMessage(1)
+	flagVision = False
+	
 # ---------------- Select Operation Mode ----------------
 def unlockMode():
 	while True:
 		mode=readPad()
 		if mode == 'A':
 			# Vision
-			displayMessage(10)
+			messageFR(1)
 			modeEric()
 		if mode == 'B':
 			# Unlock with PinPad
@@ -328,17 +435,6 @@ def internUnlock():
 		else:
 			lock()
 
-# ---------------- Define Facial Recognition Mode ----------------
-def modeEric():
-	global flagVision
-	print(" Modo Eric Uwu")
-	while not flagVision:
-		key = readPad()
-		if key == '*':
-			flagVision = True
-	print(" Ready, select mode")
-	displayMessage(1)
-	flagVision = False
 
 # ========================= MAIN =========================
 if __name__ == '__main__':

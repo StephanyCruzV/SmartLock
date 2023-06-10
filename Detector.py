@@ -1,6 +1,6 @@
 import cv2
 from time import sleep
-from PIL import Image 
+from PIL import Image
 
 def main_app(name):
 
@@ -31,6 +31,7 @@ def main_app(name):
                             font = cv2.FONT_HERSHEY_PLAIN
                             frame = cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
                             frame = cv2.putText(frame, text, (x, y-4), font, 1, (0, 255, 0), 1, cv2.LINE_AA)
+                            return True
 
                 else:   
                             pred += -1
@@ -71,3 +72,6 @@ def main_app(name):
 
         cap.release()
         cv2.destroyAllWindows()
+
+    
+    
