@@ -14,10 +14,8 @@ pinPassword = ""						# Decalre variable for pinpad password
 entrada = ""							# Declare variable to read pinpad input
 
 # ---------------- Define LCD variables ----------------
-mylcd = lcd_module.lcd()
-second = 0
-mystr = ""
-messageOption = 0
+mylcd = lcd_module.lcd()				# Define variable to control LCD
+mystr = ""								# Define string to display
 
 # ---------------- Define Flags ----------------
 flagPinPad = False						# Flag for "in PinPad Mode"
@@ -77,7 +75,7 @@ def savePassword(newpassword):
 	file.close()
 
 
-# ----------------
+# ---------------- Define LCD messages ----------------
 def displayMessage(option):
 	global mylcd
 	global mystr
@@ -113,7 +111,7 @@ def displayMessage(option):
 	sleep(1)
 	
 
-# ---------------- 
+# ---------------- Display "*" as password character ----------------
 def displayPass(usrinLen):
 	global mylcd
 	global mystr
@@ -179,6 +177,7 @@ def pinUnlock(userIn):
 			unlock()
 			GPIO.output(Green,True)
 			flagPinPad = True
+			# Display Unlocked message
 			displayMessage(8)
 			sleep(10)
 			GPIO.output(Green,False)
@@ -188,11 +187,13 @@ def pinUnlock(userIn):
 		else:
 			lock()
 			GPIO.output(Red,True)
+			# Wrong Password Message
 			displayMessage(9)
 			sleep(2)
 			GPIO.output(Red,False)
 			entrada=""
 			print("error")
+			# Ask for password again
 			displayMessage(5)
 			
 
@@ -220,6 +221,7 @@ def changePassword():
 		else:
 			userIn = userIn + key
 			print(userIn)
+			# Display "*" for every user input
 			displayPass(userIn)
 			if len(userIn) == 6:
 				gpFlag = validatePassword(pinPassword, userIn)
@@ -238,6 +240,7 @@ def changePassword():
 		else:
 			userIn = userIn + key
 			print(userIn)
+			# Display "*" for every user input
 			displayPass(userIn)
 			if len(userIn) == 6:
 				newPassword = userIn
@@ -255,17 +258,18 @@ def changePassword():
 		else:
 			userIn = userIn + key
 			print(userIn)
+			# Display "*" for every user input
 			displayPass(userIn)
 			if len(userIn) == 6:
 				gpFlag = validatePassword(newPassword, userIn)
 				print(gpFlag)
 				if not gpFlag:
-					displayMessage(6)
 					print("Missmatch password")
+					displayMessage(6)
 					return
 				else:
-					displayMessage(7)
 					print("Password changed")
+					displayMessage(7)
 					pinPassword = newPassword
 					# Save New Password in txt File
 					savePassword(pinPassword)
@@ -287,6 +291,7 @@ def modePinPad():
 		else:
 			entrada = entrada + key
 			print(entrada)
+			# Display "*" for every user input
 			displayPass(entrada)
 			pinUnlock(entrada)
 	flagPinPad = False
@@ -332,8 +337,7 @@ def modeEric():
 
 # ========================= MAIN =========================
 if __name__ == '__main__':
-	#initLCD()
-	# Init PinPad
+	
 	initPinPad()
 	displayMessage(1)
 	print(" Ready, select mode")
