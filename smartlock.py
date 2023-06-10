@@ -107,6 +107,9 @@ def displayMessage(option):
 	if option == 9:
 		mylcd.lcd_display_string("ERROR", 1, 6)
 		mylcd.lcd_display_string("WRONG PASSWORD", 2, 1)
+	if option == 10:
+		mylcd.lcd_display_string("FACIAL", 1, 5)
+		mylcd.lcd_display_string("RECOGNITION", 2, 2)
 	
 	sleep(1)
 	
@@ -304,6 +307,7 @@ def unlockMode():
 		mode=readPad()
 		if mode == 'A':
 			# Vision
+			displayMessage(10)
 			modeEric()
 		if mode == 'B':
 			# Unlock with PinPad
@@ -333,6 +337,7 @@ def modeEric():
 		if key == '*':
 			flagVision = True
 	print(" Ready, select mode")
+	displayMessage(1)
 	flagVision = False
 
 # ========================= MAIN =========================
