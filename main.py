@@ -1,6 +1,7 @@
 from Detector import main_app
 from create_classifier import train_classifer
 from create_dataset import start_capture
+from smartlock import readPad
 names = set()
 
 # Leer los nombres existentes desde el archivo
@@ -15,22 +16,23 @@ def main():
         print("\n--- Menu ---")
         print("1. Agregar un usuario")
         print("2. Verificar un usuario")
-        print("3. Salir")
-        choice = input("\nElija una opción: ")
+        print("*. Salir")
+        choice = readPad()
 
         if choice == '1':
             add_user()
         elif choice == '2':
             check_user()
-        elif choice == '3':
+        elif choice == '*':
             print("Hasta pronto!")
             break
         else:
             print("Opción inválida, intente nuevamente")
 
 def add_user():
-    name = input("\nIngrese el nombre del usuario: ")
-    if name == "None":
+    print("\nElige 1, 2 o 3")
+    name = readPad()
+    if name == "1":
         print("Error: El nombre no puede ser 'None'")
     elif name in names:
         print("Error: ¡El usuario ya existe!")
@@ -46,7 +48,10 @@ def check_user():
     print("\nUsuarios registrados: ")
     for name in names:
         print(name)
-    name = input("Seleccione el usuario: ")
+    print("Seleccione el usuario con su número correspondiente o * para salir.")
+    name = readPad()
+    if name == '*':
+        return
     if name not in names:
         print("Error: El usuario no existe")
     else:
