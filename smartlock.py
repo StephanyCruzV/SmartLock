@@ -75,7 +75,7 @@ def savePassword(newpassword):
 	file.close()
 
 
-# ---------------- Define LCD messages ----------------
+# ---------------- Define LCD PinPad messages ----------------
 def displayMessage(option):
 	global mylcd
 	global mystr
@@ -114,6 +114,21 @@ def displayMessage(option):
 	sleep(1)
 	
 
+# ---------------- Define LCD FR messages ----------------
+def messageFR(option):
+	global mylcd
+	global mystr
+	mylcd.lcd_clear()
+	if option == 1:
+		mylcd.lcd_display_string("FACIAL", 1, 5)
+		mylcd.lcd_display_string("RECOGNITION", 2, 2)
+	if option == 2:
+		mylcd.lcd_display_string("ENTER ACTUAL", 1, 1)
+		mylcd.lcd_display_string("PASSWORD:", 2, 1)
+	if option == 3:
+		mylcd.lcd_display_string("ENTER NEW", 1, 1)
+		mylcd.lcd_display_string("PASSWORD:", 2, 1)
+	
 # ---------------- Display "*" as password character ----------------
 def displayPass(usrinLen):
 	global mylcd
@@ -307,7 +322,7 @@ def unlockMode():
 		mode=readPad()
 		if mode == 'A':
 			# Vision
-			displayMessage(10)
+			messageFR(1)
 			modeEric()
 		if mode == 'B':
 			# Unlock with PinPad
