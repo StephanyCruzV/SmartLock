@@ -8,6 +8,7 @@ import lcd_module
 from Detector import main_app
 from create_classifier import train_classifer
 from create_dataset import start_capture
+import cv2 
 
 
 # ---------------- Define FR variables ----------------
@@ -139,11 +140,23 @@ def messageFR(option):
 		mylcd.lcd_display_string("FACIAL", 1, 5)
 		mylcd.lcd_display_string("RECOGNITION", 2, 2)
 	if option == 2:
-		mylcd.lcd_display_string("ENTER ACTUAL", 1, 1)
-		mylcd.lcd_display_string("PASSWORD:", 2, 1)
+		mylcd.lcd_display_string("--MENU--", 1, 4)
+		mylcd.lcd_display_string("1.Add 2.FaceR 3.Xit", 2, 1)
 	if option == 3:
-		mylcd.lcd_display_string("ENTER NEW", 1, 1)
-		mylcd.lcd_display_string("PASSWORD:", 2, 1)
+		mylcd.lcd_display_string("--USERS--", 1, 3)
+		mylcd.lcd_display_string("1.U1 2.U2 3.U3", 2, 1)
+	if option == 4:
+		mylcd.lcd_display_string("SUCCESS", 1, 4)
+		mylcd.lcd_display_string("USER RECOGNIZED", 2, 0)
+	if option == 5:
+		mylcd.lcd_display_string("RECOGNIZING", 1, 0)
+		mylcd.lcd_display_string("USER 1 ...", 2, 0)
+	if option == 6:
+		mylcd.lcd_display_string("RECOGNIZING", 1, 0)
+		mylcd.lcd_display_string("USER 2 ...", 2, 0)
+	if option == 7:
+		mylcd.lcd_display_string("RECOGNIZING", 1, 0)
+		mylcd.lcd_display_string("USER 3 ...", 2, 0)
 	
 # ---------------- Display "*" as password character ----------------
 def displayPass(usrinLen):
@@ -335,26 +348,44 @@ def modePinPad():
 # ========================= FR Functions =========================
 
 def check_user():
+	
 	print("Select User: 1, 2, 3")
+	messageFR(3)
 	openLockFlag = False
 	while not openLockFlag:
 		key = readPad()
 		
 		if key == '1':
+			messageFR(5)
 			openLockFlag = main_app("User1")
 		elif key == '2':
+			messageFR(6)
 			openLockFlag = main_app("User2")
 		elif key == '3':
+			messageFR(7)
 			openLockFlag = main_app("User3")
 	print("User Recognized")
-	sleep(1)
+	messageFR(4)
+	cv2.destroyAllWindows()
+	flagUnlock.value = True
+	unlock()
+	GPIO.output(Green,True)
+	flagPinPad = True
+	# Display Unlocked message
+	displayMessage(8)
+	sleep(10)
+	GPIO.output(Green,False)
+	flagUnlock.value = False
+	lock()
 	print(" Ready, select mode")
+	displayMessage(1)
 	unlockMode()
 		
 
 
 def add_user():
 	print("\nElige 1, 2 o 3")
+	messageFR(3)
 	
 	while True:
 		key = readPad()
@@ -380,11 +411,13 @@ def add_user():
 		
 
 def displayMenu():
+	global flagVision
+	
 	print("\n--- Menu ---")
 	print("1. Agregar un usuario")
 	print("2. Verificar un usuario")
 	print("*. Salir")
-	
+	messageFR(2)
 	while True:
 		key = readPad()
 		
@@ -393,7 +426,9 @@ def displayMenu():
 		elif key == '2':
 			check_user()
 		elif key == '*':
-			flagVision = True
+			print(" Ready, select mode")
+			displayMessage(1)
+			unlockMode()
 	
 
 # ---------------- Define Facial Recognition Mode ----------------
